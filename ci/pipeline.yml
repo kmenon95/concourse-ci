@@ -1,18 +1,17 @@
 resources:
 - name: semgrep
-  type: github-release
+  type: git
   source:
-    owner: kmenon95
-    repository: concourse-ci
-    release: latest
+    uri: https://github.com/kmenon95/concourse-ci.git
+    branch: main
 
 jobs:
-- name: semgrep
+- name: semgrep-scan
   plan:
   - get: semgrep
     trigger: true
     version: { branch: main }
-  - task: semgrep-task
+  - task: semgrep-scan
     config:
       platform: linux
       image_resource:
@@ -26,4 +25,4 @@ jobs:
         - -exc
         - |
           cd semgrep
-          semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*'
+          semgrep ci .
