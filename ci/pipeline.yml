@@ -1,31 +1,30 @@
-resources: []
+resources:
+- name: semgrep
+  type: github-release
+  source:
+    owner: kmenon95
+    repository: concourse-ci
+    release: latest
+    token: ((github-token))
 
 jobs:
-- name: say-hello
+- name: semgrep
   plan:
-  - task: hello-task
-    config:
-      platform: linux
-      image_resource:
-        type: registry-image
-        source: {repository: busybox}
-      run:
-        path: echo
-        args: ["Hello, world!"]
-
-- name: semgrep-scan
-  plan:
+  - get: semgrep
+    trigger: true
+    version: { branch: main }
   - task: semgrep-task
     config:
       platform: linux
       image_resource:
-        type: registry-image
+        type: docker-image
         source: {repository: returntocorp/semgrep}
       inputs:
-        - name: source-code
+      - name: semgrep
       run:
-        path: sh
+        path: /bin/sh
         args:
-          - -exc
-          - |
-            semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*'
+        - -exc
+        - |
+          cd semgrep
+          semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*'
