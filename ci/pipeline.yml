@@ -2,7 +2,7 @@ resources:
 - name: hello-world-repo
   type: git
   source:
-    uri: https://github.com/your-username/hello-world.git
+    uri: https://github.com/kmenon95/hello-world.git
     branch: main
 
 jobs:
