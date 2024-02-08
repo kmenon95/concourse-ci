@@ -12,3 +12,20 @@ jobs:
       run:
         path: echo
         args: ["Hello, world!"]
+
+- name: semgrep-scan
+  plan:
+  - task: semgrep-task
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source: {repository: returntocorp/semgrep}
+      inputs:
+        - name: source-code
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*'
