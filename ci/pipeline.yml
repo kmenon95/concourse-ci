@@ -1,15 +1,8 @@
-resources:
-- name: hello-world-repo
-  type: git
-  source:
-    uri: https://github.com/kmenon95/hello-world.git
-    branch: main
+resources: []
 
 jobs:
 - name: say-hello
   plan:
-  - get: hello-world-repo
-    trigger: true
   - task: hello-task
     config:
       platform: linux
