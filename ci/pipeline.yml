@@ -1,28 +1,17 @@
-resources:
-- name: semgrep
-  type: git
-  source:
-    uri: https://github.com/kmenon95/concourse-ci.git
-    branch: main
+resources: []
 
 jobs:
 - name: semgrep-scan
   plan:
-  - get: semgrep
-    trigger: true
-    version: { branch: main }
   - task: semgrep-scan
     config:
       platform: linux
       image_resource:
         type: docker-image
         source: {repository: returntocorp/semgrep}
-      inputs:
-      - name: semgrep
       run:
         path: /bin/sh
         args:
         - -exc
         - |
-          cd semgrep
           semgrep ci .
