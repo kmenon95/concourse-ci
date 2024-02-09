@@ -1,16 +1,25 @@
-resources:
-- name: repo-to-scan
-  type: git
-  source:
-    uri: https://github.com/kmenon95/concourse-ci.git
-    branch: main
+resources: []
 
 jobs:
 - name: semgrep-scan
   plan:
-  - get: repo-to-scan
-    trigger: true
-    version: { branch: main }
+  - task: fetch-repo
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source: { repository: alpine/git, tag: latest }
+      params:
+        REPO_URL: https://github.com/kmenon95/concourse-ci/archive/refs/heads/main.zip
+      run:
+        path: /bin/sh
+        args:
+        - -exc
+        - |
+          apk add --no-cache curl
+          curl -L -o repo.zip $REPO_URL
+          unzip repo.zip
+          rm repo.zip
   - task: semgrep-scan
     config:
       platform: linux
