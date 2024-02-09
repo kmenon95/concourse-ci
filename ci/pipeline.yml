@@ -22,7 +22,7 @@ jobs:
         type: registry-image
         source: { repository: alpine/git, tag: latest }
       params:
-        REPO_URL: https://github.com/kmenon95/concourse-ci.git
+        REPO_URL: https://github.com/kmenon95/WebGoat.NET.git
       run:
         path: /bin/sh
         args:
