@@ -9,9 +9,12 @@ jobs:
       image_resource:
         type: docker-image
         source: {repository: returntocorp/semgrep}
+      params:
+        SEMGREP_APP_TOKEN: ((semgrep_cli_token))  # Pass the Semgrep CLI token as an environment variable
       run:
         path: /bin/sh
         args:
         - -exc
         - |
+          semgrep login --token=$SEMGREP_APP_TOKEN  # Login using the provided token
           semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*'
