@@ -1,8 +1,16 @@
-resources: []
+resources:
+- name: repo-to-scan
+  type: git
+  source:
+    uri: https://github.com/kmenon95/concourse-ci.git
+    branch: main
 
 jobs:
 - name: semgrep-scan
   plan:
+  - get: repo-to-scan
+    trigger: true
+    version: { branch: main }
   - task: semgrep-scan
     config:
       platform: linux
