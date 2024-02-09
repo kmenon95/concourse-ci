@@ -3,32 +3,6 @@ resources: []
 jobs:
 - name: semgrep-scan
   plan:
-  - task: install-git
-    config:
-      platform: linux
-      image_resource:
-        type: registry-image
-        source: { repository: alpine/git, tag: latest }
-      run:
-        path: /bin/sh
-        args:
-        - -exc
-        - |
-          apk add --no-cache git
-  - task: clone-repo
-    config:
-      platform: linux
-      image_resource:
-        type: registry-image
-        source: { repository: alpine/git, tag: latest }
-      params:
-        REPO_URL: https://github.com/kmenon95/WebGoat.NET.git
-      run:
-        path: /bin/sh
-        args:
-        - -exc
-        - |
-          git clone $REPO_URL .
   - task: semgrep-scan
     config:
       platform: linux
@@ -44,5 +18,12 @@ jobs:
         - |
           echo "Logging into Semgrep"
           echo $SEMGREP_APP_TOKEN | semgrep login  # Pipe the token into semgrep login
-          cd WebGoat.NET  # Change directory to the cloned repository
+          
+          echo "Cloning repository"
+          git clone https://github.com/kmenon95/WebGoat.NET.git
+
+          echo "Changing directory to cloned repository"
+          cd WebGoat.NET
+
+          echo "Running Semgrep scan"
           semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*' .
