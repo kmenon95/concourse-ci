@@ -34,31 +34,31 @@ jobs:
           # Get the list of branches using git ls-remote
           branches=$(git ls-remote --heads origin)
           
-# Iterate over all branches
-for branch_info in $branches; do
-    # Extract branch name
-    branch=$(echo $branch_info | cut -d'/' -f3)
-    
-    # Check if it's the default branch
-    if [[ $branch = "$default_branch" ]]; then
-        echo "Running Semgrep scan on default branch: $default_branch"
-        # Fetch and checkout the default branch
-        git checkout $default_branch
-    else
-        # Check if it's a pull request branch
-        if [[ $(curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/kmenon95/WebGoat.NET/pulls?head=$branch | jq '.[].number') != "[]" ]]; then
-            echo "Running Semgrep scan on pull request branch: $branch"
-            # Fetch the pull request branch and checkout
-            git fetch origin $branch:$branch
-            git checkout $branch
-        else
-            # Otherwise, it's a regular branch
-            echo "Skipping Semgrep scan on branch $branch as it does not have an associated open pull request."
-            continue
-        fi
-    fi
+          # Iterate over all branches
+          for branch_info in $branches; do
+              # Extract branch name
+              branch=$(echo $branch_info | cut -d'/' -f3)
+              
+              # Check if it's the default branch
+              if [[ $branch = "$default_branch" ]]; then
+                  echo "Running Semgrep scan on default branch: $default_branch"
+                  # Fetch and checkout the default branch
+                  git checkout $default_branch
+              else
+                  # Check if it's a pull request branch
+                  if [[ $(curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/kmenon95/WebGoat.NET/pulls?head=$branch | jq '.[].number') != "[]" ]]; then
+                      echo "Running Semgrep scan on pull request branch: $branch"
+                      # Fetch the pull request branch and checkout
+                      git fetch origin $branch:$branch
+                      git checkout $branch
+                  else
+                      # Otherwise, it's a regular branch
+                      echo "Skipping Semgrep scan on branch $branch as it does not have an associated open pull request."
+                      continue
+                  fi
+              fi
 
-    # Run Semgrep scan
-    echo "Running Semgrep scan"
-    semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*'
-done
+              # Run Semgrep scan
+              echo "Running Semgrep scan"
+              semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*'
+          done
