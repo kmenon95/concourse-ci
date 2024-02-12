@@ -30,35 +30,37 @@ jobs:
           
           # Get the name of the default branch
           default_branch=$(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
-          
-          # Get the list of branches using git ls-remote
-          branches=$(git ls-remote --heads origin)
-          
+
+          # Fetch pull request information using GitHub API
+          pull_requests=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/kmenon95/WebGoat.NET/pulls")
+
           # Iterate over all branches
-          for branch_info in $branches; do
+          for branch_info in $(git branch -r | grep -v '->'); do
             # Extract branch name
-            branch=$(echo $branch_info | cut -d'/' -f3)
+            branch=$(echo $branch_info | tr -d '[:space:]')
             # Check if it's the default branch
-            if [[ $branch = "$default_branch" ]]; then
+            if [[ $branch = "origin/$default_branch" ]]; then
               echo "Running Semgrep scan on default branch: $default_branch"
               # Fetch and checkout the default branch
               git checkout $default_branch
             else
               # Check if it's a pull request branch
-              if [[ $branch =~ ^pr-[0-9]+$ ]]; then
-                echo "Running Semgrep scan on pull request branch: $branch"
-                # Fetch the pull request branch and checkout
-                git fetch origin $branch:$branch
-                git checkout $branch
+              if [[ $branch =~ ^origin/pr-[0-9]+$ ]]; then
+                # Extract PR number from branch name
+                pr_number=$(echo $branch | cut -d'-' -f2)
+                # Check if PR is open
+                if echo "$pull_requests" | jq ".[] | select(.number == $pr_number) | .state" | grep -q "open"; then
+                  echo "Running Semgrep scan on pull request branch: $branch"
+                  # Fetch the pull request branch and checkout
+                  git fetch origin $branch:$branch
+                  git checkout $branch
+                  # Run Semgrep scan
+                  echo "Running Semgrep scan"
+                  semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*'
+                fi
               else
                 # Otherwise, it's a regular branch
-                echo "Running Semgrep scan on branch: $branch"
-                # Checkout the branch
-                git checkout $branch
+                echo "Skipping Semgrep scan on branch: $branch"
               fi
             fi
-
-            # Run Semgrep scan
-            echo "Running Semgrep scan"
-            semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*'
           done
