@@ -25,5 +25,16 @@ jobs:
           echo "Changing directory to cloned repository"
           cd WebGoat.NET
 
+          if [[ -n "$CI_PULL_REQUEST" ]]; then
+            # If it's a PR branch, checkout the PR branch and run Semgrep
+            echo "Running Semgrep scan on pull request branch"
+            git fetch origin pull/$CI_PULL_REQUEST/head:pr-$CI_PULL_REQUEST
+            git checkout pr-$CI_PULL_REQUEST
+          else
+            # Otherwise, just run Semgrep on the main branch
+            echo "Running Semgrep scan on main branch"
+            git checkout main
+          fi
+
           echo "Running Semgrep scan"
-          semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*' 
+          semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*'
