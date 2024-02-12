@@ -25,13 +25,5 @@ jobs:
           echo "Changing directory to cloned repository"
           cd WebGoat.NET
 
-          echo "Running Semgrep scan on main branch"
+          echo "Running Semgrep scan"
           semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*' .
-
-          echo "Checking out pull requests"
-          git fetch origin pull/*/*:refs/remotes/origin/pr/*  # Fetch all pull requests
-          for pr in $(git ls-remote --exit-code --heads origin | grep refs/remotes/origin/pr | cut -d '/' -f 4); do  # Iterate over all pull requests
-            git checkout pr/$pr  # Checkout each pull request branch
-            echo "Running Semgrep scan on PR #$pr"
-            semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*' .
-          done
