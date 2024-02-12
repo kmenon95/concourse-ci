@@ -28,21 +28,31 @@ jobs:
           # Fetch all branches
           git fetch --all
           
+          # Get the name of the default branch
+          default_branch=$(git remote show origin | grep 'HEAD branch' | cut -d':' -f2 | tr -d '[:space:]')
+          
           # Iterate over all branches
           for branch in $(git branch -r | grep -v '->'); do
             # Trim whitespace
             branch=$(echo $branch | tr -d '[:space:]')
-            # Check if it's a pull request branch
-            if [[ $branch =~ ^origin/pr-[0-9]+$ ]]; then
-              echo "Running Semgrep scan on pull request branch: $branch"
-              # Fetch the pull request branch and checkout
-              git fetch origin $branch:refs/remotes/$branch
-              git checkout $branch
+            # Check if it's the default branch
+            if [[ $branch = "origin/$default_branch" ]]; then
+              echo "Running Semgrep scan on default branch: $default_branch"
+              # Fetch and checkout the default branch
+              git checkout $default_branch
             else
-              # Otherwise, it's a regular branch
-              echo "Running Semgrep scan on branch: $branch"
-              # Checkout the branch
-              git checkout ${branch#*/}
+              # Check if it's a pull request branch
+              if [[ $branch =~ ^origin/pr-[0-9]+$ ]]; then
+                echo "Running Semgrep scan on pull request branch: $branch"
+                # Fetch the pull request branch and checkout
+                git fetch origin $branch:refs/remotes/$branch
+                git checkout $branch
+              else
+                # Otherwise, it's a regular branch
+                echo "Running Semgrep scan on branch: ${branch#*/}"
+                # Checkout the branch
+                git checkout ${branch#*/}
+              fi
             fi
 
             # Run Semgrep scan
