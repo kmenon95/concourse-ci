@@ -19,14 +19,21 @@ jobs:
           echo "Logging into Semgrep"
           echo $SEMGREP_APP_TOKEN | semgrep login  # Pipe the token into semgrep login
           
-          echo "Cloning repository"
-          git clone https://github.com/kmenon95/WebGoat.NET.git
+          # Check if the repository is already cloned
+          if [ -d "concourse-ci" ]; then
+              echo "Repository already cloned. Fetching latest changes."
+              cd concourse-ci
+              git fetch origin
+          else
+              echo "Cloning repository"
+              git clone https://github.com/kmenon95/concourse-ci.git
+              cd concourse-ci
+          fi
 
           echo "Changing directory to cloned repository"
-          cd WebGoat.NET
 
           # Fetch all pull request branches
-          pull_requests=$(curl -s https://api.github.com/repos/kmenon95/WebGoat.NET/pulls)
+          pull_requests=$(curl -s https://api.github.com/repos/kmenon95/concourse-ci/pulls)
           
           # Check if there are any open pull requests
           if [[ $(echo $pull_requests | jq length) -eq 0 ]]; then
