@@ -28,10 +28,16 @@ jobs:
           # Fetch all pull request branches
           pull_requests=$(curl -s https://api.github.com/repos/kmenon95/WebGoat.NET/pulls)
           
+          # Check if there are any open pull requests
+          if [[ $(echo $pull_requests | jq length) -eq 0 ]]; then
+              echo "No open pull requests found. Exiting."
+              exit 0
+          fi
+
           # Iterate over all pull requests
-          for pr_info in $pull_requests; do
+          for pr_info in $(echo $pull_requests | jq -r '.[] | @base64'); do
               # Extract branch name
-              branch=$(echo $pr_info | jq -r '.head.ref')
+              branch=$(echo $pr_info | base64 -d | jq -r '.head.ref')
               
               # Checkout the pull request branch
               echo "Running Semgrep scan on pull request branch: $branch"
