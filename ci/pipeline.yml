@@ -47,4 +47,5 @@ jobs:
             git checkout pr-$pr_number
             echo "Running Semgrep scan"
             semgrep ci --exclude='*.webp' --exclude='*.png' --exclude='*.svg' --exclude='*.woff' --exclude='*.woff2' --exclude='*.jpg' --exclude='*.glb' --exclude='*.pdf' --exclude='*.lock' --exclude='*.md'  --exclude='*.pro' --exclude='.github/*'
+            git checkout $default_branch
           done
