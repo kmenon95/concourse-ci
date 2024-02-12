@@ -43,7 +43,7 @@ jobs:
             branch=$(echo $branch_info | cut -d'/' -f3)
             
             # Check if it's a pull request branch
-            if [[ $branch =~ ^pr-[0-9]+$ ]]; then
+            if [[ $branch =~ ^refs/pull/[0-9]+/head$ ]]; then
               pr_found=true
               echo "Running Semgrep scan on pull request branch: $branch"
               # Fetch the pull request branch and checkout
@@ -57,7 +57,7 @@ jobs:
           done
           
           # Check if any open pull requests were found
-          if [ "$pr_found" = true ]; then
+          if [ "$pr_found" = false ]; then
             # Fetch and checkout the default branch
             git checkout $default_branch
             echo "Running Semgrep scan on default branch: $default_branch"
