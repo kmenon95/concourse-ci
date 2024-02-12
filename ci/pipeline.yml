@@ -31,10 +31,13 @@ jobs:
           # Get the name of the default branch
           default_branch=$(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
           
+          # Get the list of branches using git ls-remote
+          branches=$(git ls-remote --heads origin)
+          
           # Iterate over all branches
-          for branch in $(git branch -r | awk -F/ '{print $NF}'); do
-            # Trim whitespace
-            branch=$(echo $branch | tr -d '[:space:]')
+          for branch_info in $branches; do
+            # Extract branch name
+            branch=$(echo $branch_info | cut -d'/' -f3)
             # Check if it's the default branch
             if [[ $branch = "$default_branch" ]]; then
               echo "Running Semgrep scan on default branch: $default_branch"
